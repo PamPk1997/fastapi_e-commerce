@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Page</title>
+    <!-- Include Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Complete Your Payment</h1>
+
+    <form id="payment-form">
+        <div id="card-element">
+            <!-- Stripe Elements will create the card input here -->
+        </div>
+        <button id="submit">Pay</button>
+    </form>
+
+    <!-- Include your JavaScript file -->
+    <script src="/static/payment.js"></script>
+
+    <!-- Pass necessary variables to JavaScript -->
+    <script>
+        // Variables passed from the server-side
+        const orderId = {{ order_id }};
+        const stripePublicKey = "{{ pk_test_51QCHnvExyakfDI8GZ3wGl3QqBkWHeSQ0MsBHBWMCPrSje7xDAgP80J1vXkReiunG9npvEQLS10JiUUXMm2vc3kK500dQKuYi0O }}";
+    </script>
+</body>
+</html>

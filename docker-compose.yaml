@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  ecom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "
+      ./wait-for-it.sh db:5432 &&
+      ./wait-for-it.sh redis:6379 &&
+      alembic revision --autogenerate -m 'added some tables' &&
+      alembic upgrade head &&
+      uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    container_name: fastapi_ecom
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      celery_worker:
+        condition: service_started
+    restart: unless-stopped
+    env_file:
+      - .env  # Reference to the .env file containing environment variables
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+
+  db:
+    image: postgres:17.1
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTGRES_DB: ${DATABASE_NAME:-ecom_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DATABASE_USERNAME:-postgres}"]
+      interval: 30s
+      retries: 3
+      timeout: 5s
+
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+      timeout: 3s
+
+  celery_worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "
+      ./wait-for-it.sh redis:6379 &&
+      celery -A src.celery_app worker --loglevel=info
+      "
+    container_name: celery_worker
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+    networks:
+      - app_network
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sS", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  jenkins_agent:
+    image: jenkins/inbound-agent:latest
+    container_name: jenkins_agent
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_AGENT_NAME=ecom-agent
+      - JENKINS_SECRET=ff95d04850f6665dd2e950bd32cfb18fd1233e05015d58629a6696dd88f77d38
+    depends_on:
+      jenkins:
+        condition: service_healthy
+    networks:
+      - app_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
+    driver: local
+  jenkins_home:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge

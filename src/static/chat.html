@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User-Agent Chat</title>
+    <style>
+        #messages {
+            width: 100%;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .file-preview img, .file-preview video {
+            max-width: 100%;
+            max-height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Application</h1>
+
+    <div id="messages"></div>
+
+    <!-- Message Input -->
+    <div>
+        <input type="text" id="messageInput" placeholder="Type your message" style="width: 80%;">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- File Input -->
+    <div>
+        <input type="file" id="fileInput" style="margin-top: 10px;">
+        <button onclick="sendFile()">Send File</button>
+    </div>
+
+    <script>
+        const userId = "user123"; // Replace with dynamic user ID
+        const websocket = new WebSocket(`ws://localhost:8000/api/v1/support/chat/${userId}`);
+
+        const messagesContainer = document.getElementById("messages");
+
+        function appendMessage(content, isFile = false) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+            if (isFile) {
+                const filePreview = document.createElement("div");
+                filePreview.classList.add("file-preview");
+
+                if (content.type === "image") {
+                    const img = document.createElement("img");
+                    img.src = content.url;
+                    filePreview.appendChild(img);
+                } else if (content.type === "video") {
+                    const video = document.createElement("video");
+                    video.src = content.url;
+                    video.controls = true;
+                    filePreview.appendChild(video);
+                } else if (content.type === "pdf") {
+                    const link = document.createElement("a");
+                    link.href = content.url;
+                    link.download = content.name;
+                    link.textContent = `Download PDF: ${content.name}`;
+                    filePreview.appendChild(link);
+                }
+                messageDiv.appendChild(filePreview);
+            } else {
+                messageDiv.textContent = content;
+            }
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        websocket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            if (data.type === "message") {
+                appendMessage(data.content);
+            } else if (data.type === "file") {
+                appendMessage({ type: data.fileType, url: data.url, name: data.name }, true);
+            }
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value;
+            if (message) {
+                websocket.send(JSON.stringify({ type: "message", content: message, recipient: "agent123" }));
+                messageInput.value = "";
+            }
+        }
+
+        async function sendFile() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+            if (file) {
+                const fileType = file.type.startsWith("image")
+                    ? "image"
+                    : file.type.startsWith("video")
+                    ? "video"
+                    : file.name.endsWith(".pdf")
+                    ? "pdf"
+                    : "unknown";
+
+                websocket.send(JSON.stringify({ type: "file", name: file.name, fileType, recipient: "agent123" }));
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    appendMessage({ type: fileType, url: e.target.result, name: file.name }, true);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

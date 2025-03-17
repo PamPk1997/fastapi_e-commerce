@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.idea/
+.vscode/
+
+# FastAPI specific
+*.log
+*.env
+*.venv
+.env.*
+.venv/
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# Environments
+.env
+.venv
+env/
