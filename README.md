@@ -47,7 +47,7 @@ alembic upgrade head
 
 uvicorn app.main:app --reload
 
-The project will be available at http://127.0.0.1:8000.
+The project will be available at http://127.0.0.1:8000/docs.
 
 --------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ docker-compose up --build
 
 4. Access the Application
 
-The application will be available at http://localhost:8000.
+The application will be available at http://localhost:8000/docs.
 
 --------------------------------------------------------------------------
 
