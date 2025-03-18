@@ -11,26 +11,25 @@ Getting Started
 Ensure you have the following installed:
 - Python 3.12+
 - PostgreSQL
-- Docker and Docker Compose (if running with Docker)
+- Docker and Docker Compose 
 
 --------------------------------------------------------------------------
 
 2. Create a Virtual Environment
-```bash
+
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
 
 3. Install Dependencies
-```bash
+
 pip install -r requirements.txt
-```
 
 4. Configure Environment Variables
+
 Copy the provided `.env.example` file and update it as needed:
-```bash
+
 cp .env.example .env
-```
+
 Set values for the following keys:
 - `DATABASE_URL`: Database connection string (e.g., `postgresql://user:password@localhost/db_name`).
 
@@ -40,14 +39,14 @@ Running the Project Locally
 
 1. Apply Migrations
 Run the database migrations:
-```bash
+
 alembic upgrade head
-```
+
 
 2. Start the Server
-```bash
+
 uvicorn app.main:app --reload
-```
+
 The project will be available at http://127.0.0.1:8000.
 
 --------------------------------------------------------------------------
@@ -59,40 +58,34 @@ To run the project using Docker, you need to make the following changes:
 
 .env File
 In the `.env` file, update the `DATABASE_URL` host from `localhost` to `db`:
-```env
+
 DATABASE_URL=postgresql://user:password@db/db_name
-```
+
 
 alembic.ini File
 In the `alembic.ini` file, update the database connection string:
-```ini
+
 sqlalchemy.url = postgresql://user:password@db/db_name
-```
+
 
 2. Build and Start Containers
 Build the Docker images and start the containers using Docker Compose:
-```bash
-docker-compose up --build
-```
 
-3. Apply Migrations Inside the Container
-Once the containers are running, apply migrations:
-```bash
-docker exec -it <app-container-name> alembic upgrade head
-```
+docker-compose up --build
 
 4. Access the Application
+
 The application will be available at http://localhost:8000.
 
 --------------------------------------------------------------------------
 
 Key Commands
-run docker container 
-docker-compose up 
+--> run docker container 
+--> docker-compose up 
 
 Stop Docker Containers
 
-docker-compose down
+--> docker-compose down
 
 
 Troubleshooting
@@ -107,3 +100,12 @@ Troubleshooting
 - If migrations fail, ensure the database is up-to-date and the `DATABASE_URL` is correct.
 
 --------------------------------------------------------------------------
+
+
+Reset script
+
+If you stuck where you want to reset the whole docker config like containers and volumes 
+simply run the reset.sh script 
+
+# ./reset.sh soft   -> just rebuild
+# ./reset.sh hard   -> wipe volumes too
