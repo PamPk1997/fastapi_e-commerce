@@ -67,7 +67,7 @@ if __name__ == "__main__":
     from sqlalchemy.orm import sessionmaker
 
     # Replace with your database URL
-    DATABASE_URL = "postgresql+psycopg2://postgres:Admin123@localhost:5432/ecomdb"  # Example: SQLite database
+    DATABASE_URL = "postgresql+psycopg2://postgres:Admin123@localhost:5432/ecom_db"  # Example: SQLite database
     engine = create_engine(DATABASE_URL)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

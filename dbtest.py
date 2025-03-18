@@ -8,7 +8,7 @@ def connect_to_db():
            password = "Admin123",
            host = "localhost",
            port = "5432",
-           database = "ecomdb"
+           database = "ecom_db"
         ) as connection:
             with connection.cursor() as cursor:
 
