@@ -6,8 +6,7 @@ docker-compose down -v
 echo "Removing orphan containers..."
 docker system prune -f
 
-echo "Rebuilding..."
-docker-compose up --build
+docker volume rm -rf ecom_postgres_data
 
 
 
