@@ -103,21 +103,22 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-  jenkins_agent:
-    image: jenkins/inbound-agent:latest
-    container_name: jenkins_agent
-    environment:
-      - JENKINS_URL=http://jenkins:8080
-      - JENKINS_AGENT_NAME=ecom-agent
-      - JENKINS_SECRET=ff95d04850f6665dd2e950bd32cfb18fd1233e05015d58629a6696dd88f77d38
-    depends_on:
-      jenkins:
-        condition: service_healthy
-    networks:
-      - app_network
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
+      
+  # jenkins_agent:
+  #   image: jenkins/inbound-agent:latest
+  #   container_name: jenkins_agent
+  #   environment:
+  #     - JENKINS_URL=http://jenkins:8080
+  #     - JENKINS_AGENT_NAME=ecom-agent
+  #     - JENKINS_SECRET=ff95d04850f6665dd2e950bd32cfb18fd1233e05015d58629a6696dd88f77d38
+  #   depends_on:
+  #     jenkins:
+  #       condition: service_healthy
+  #   networks:
+  #     - app_network
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   restart: unless-stopped
 
 
 volumes:
